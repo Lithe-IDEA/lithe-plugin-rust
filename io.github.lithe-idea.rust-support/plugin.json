@@ -1,0 +1,954 @@
+{
+  "schemaVersion": 0,
+  "id": "io.github.lithe-idea.rust-support",
+  "displayName": "Rust Support",
+  "version": "0.1.0",
+  "pluginAPIVersion": 0,
+  "requires": {
+    "backend": 0,
+    "buildProviders": 1,
+    "buildSystems": 0,
+    "commandInstallers": 1,
+    "debugAdapters": 0,
+    "languageServers": 0,
+    "languages": 0,
+    "projectGenerators": 0,
+    "settings": 0,
+    "toolDefinitions": 1
+  },
+  "requiresTools": [
+    "cargo",
+    "rust-analyzer",
+    "rustup"
+  ],
+  "vendor": {
+    "id": "io.github.lithe-idea",
+    "displayName": "Lithe Community",
+    "signatureRequirement": "none"
+  },
+  "permissions": [
+    "backend.launch",
+    "commands.install",
+    "debug.launch",
+    "languageServer.launch",
+    "process.build",
+    "project.generate",
+    "workspace.metadata"
+  ],
+  "activationEvents": [
+    "onBuildSystem:cargo",
+    "onDebug:codelldb",
+    "onLanguage:rust"
+  ],
+  "settings": [
+    {
+      "id": "checkOnSave",
+      "type": "boolean",
+      "title": "Check on save",
+      "description": "Run Cargo's check each time a Rust file is saved and show what it finds as diagnostics.",
+      "default": true,
+      "effect": "immediate",
+      "page": {
+        "languageID": "rust"
+      },
+      "section": "rust-analyzer"
+    },
+    {
+      "id": "checkCommand",
+      "type": "enum",
+      "title": "Check command",
+      "description": "The Cargo command the check on save runs. Clippy adds its lints and takes longer.",
+      "default": "check",
+      "effect": "immediate",
+      "page": {
+        "languageID": "rust"
+      },
+      "section": "rust-analyzer",
+      "options": [
+        {
+          "value": "check",
+          "title": "cargo check"
+        },
+        {
+          "value": "clippy",
+          "title": "cargo clippy"
+        }
+      ]
+    },
+    {
+      "id": "installRustAnalyzer",
+      "type": "boolean",
+      "title": "Install rust-analyzer with rustup",
+      "description": "When the project's rustup toolchain lacks rust-analyzer, add it and rust-src with rustup component add before starting it.",
+      "default": true,
+      "page": {
+        "languageID": "rust"
+      },
+      "section": "rust-analyzer"
+    }
+  ],
+  "languages": [
+    {
+      "id": "rust",
+      "displayName": "Rust",
+      "fileExtensions": [
+        "rs"
+      ],
+      "projectFileNames": [
+        "Cargo.toml"
+      ],
+      "dependencies": {
+        "managementFileNames": [
+          "Cargo.toml",
+          "Cargo.lock"
+        ]
+      }
+    }
+  ],
+  "languageServers": [
+    {
+      "languageID": "rust",
+      "languageIdentifier": "rust",
+      "launch": {
+        "kind": "backend",
+        "function": "rustAnalyzer.launch",
+        "timeoutMilliseconds": 120000
+      },
+      "workspaceConfiguration": {
+        "rust-analyzer": {
+          "checkOnSave": "${setting:checkOnSave}",
+          "check": {
+            "command": "${setting:checkCommand}"
+          }
+        }
+      }
+    }
+  ],
+  "buildSystems": [
+    {
+      "id": "cargo",
+      "displayName": "Cargo",
+      "detection": {
+        "markers": [
+          "Cargo.toml"
+        ],
+        "nesting": "outermost",
+        "priority": 60
+      },
+      "invocation": {
+        "executables": [
+          {
+            "id": "toolchain",
+            "kind": "toolchain",
+            "toolchainID": "cargo"
+          }
+        ]
+      },
+      "provider": {
+        "launch": {
+          "kind": "packaged",
+          "path": "bin/backend"
+        },
+        "executesProjectCode": true,
+        "mayUseNetwork": true
+      },
+      "options": [
+        {
+          "id": "release",
+          "displayName": "Release Profile",
+          "kind": "boolean",
+          "description": "Build with the release profile: optimized, without debug assertions. Programs go to target/release.",
+          "arguments": [
+            "--release"
+          ]
+        },
+        {
+          "id": "features",
+          "displayName": "Features",
+          "kind": "multiSelect",
+          "choicesFromModel": true,
+          "presentation": "tree",
+          "description": "Features to turn on, listed for each package. A command passes only the features of the packages it builds.",
+          "arguments": [
+            "--features",
+            "${value}"
+          ]
+        },
+        {
+          "id": "allFeatures",
+          "displayName": "All Features",
+          "kind": "boolean",
+          "description": "Turn on every feature of the packages a command builds. Overrides the features chosen above.",
+          "arguments": [
+            "--all-features"
+          ]
+        },
+        {
+          "id": "noDefaultFeatures",
+          "displayName": "No Default Features",
+          "kind": "boolean",
+          "description": "Leave out each package's default features; only the chosen features are on.",
+          "arguments": [
+            "--no-default-features"
+          ]
+        },
+        {
+          "id": "offline",
+          "displayName": "Offline",
+          "kind": "boolean",
+          "description": "Build without the network, from what Cargo has already downloaded.",
+          "arguments": [
+            "--offline"
+          ]
+        }
+      ],
+      "model": {
+        "source": "provider"
+      },
+      "tasks": [
+        {
+          "id": "build",
+          "displayName": "Build",
+          "group": "build",
+          "scopes": [
+            "workspace",
+            "project",
+            "target"
+          ],
+          "source": "provider",
+          "arguments": []
+        },
+        {
+          "id": "check",
+          "displayName": "Check",
+          "group": "verification",
+          "scopes": [
+            "workspace",
+            "project",
+            "target"
+          ],
+          "source": "provider",
+          "arguments": []
+        },
+        {
+          "id": "clippy",
+          "displayName": "Clippy",
+          "group": "verification",
+          "scopes": [
+            "workspace",
+            "project",
+            "target"
+          ],
+          "source": "provider",
+          "arguments": []
+        },
+        {
+          "id": "doc",
+          "displayName": "Doc",
+          "group": "documentation",
+          "scopes": [
+            "workspace",
+            "project"
+          ],
+          "source": "provider",
+          "arguments": []
+        },
+        {
+          "id": "clean",
+          "displayName": "Clean",
+          "group": "build",
+          "scopes": [
+            "workspace",
+            "project"
+          ],
+          "source": "provider",
+          "arguments": []
+        }
+      ],
+      "run": [
+        {
+          "id": "application",
+          "source": "provider",
+          "fromTargets": {
+            "tags": [
+              "application"
+            ]
+          },
+          "debug": {
+            "adapter": "codelldb"
+          }
+        },
+        {
+          "id": "example",
+          "source": "provider",
+          "fromTargets": {
+            "tags": [
+              "example"
+            ]
+          },
+          "debug": {
+            "adapter": "codelldb"
+          }
+        },
+        {
+          "id": "rust-main",
+          "source": "provider",
+          "name": "Cargo Run",
+          "entrypoints": true
+        }
+      ],
+      "diagnostics": {
+        "decoder": "lineMatcher",
+        "patterns": [
+          {
+            "regex": "^([^\\s:][^:]*\\.rs):(\\d+):(\\d+): (error|warning)(?:\\[[\\w:]+\\])?: (.+)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "message": 5
+          }
+        ]
+      },
+      "dependencies": {
+        "source": "provider",
+        "scopes": [
+          "workspace",
+          "project"
+        ]
+      },
+      "sync": {
+        "watch": [
+          "Cargo.toml",
+          "Cargo.lock",
+          ".cargo/config",
+          ".cargo/config.toml",
+          "rust-toolchain",
+          "rust-toolchain.toml"
+        ]
+      },
+      "layout": {
+        "excluded": [
+          "target"
+        ]
+      }
+    }
+  ],
+  "debugAdapters": [
+    {
+      "id": "codelldb",
+      "displayName": "Rust (CodeLLDB)",
+      "adapterID": "lldb",
+      "requests": [
+        "launch"
+      ],
+      "selectors": [
+        {
+          "targetKinds": [
+            "executable"
+          ]
+        }
+      ],
+      "configurationTypes": [
+        "lldb"
+      ],
+      "configurations": {
+        "launch": {
+          "arguments": {
+            "sourceLanguages": [
+              "rust"
+            ],
+            "terminal": "console"
+          },
+          "targetBindings": {
+            "program": "target.path",
+            "cwd": "target.workingDirectory",
+            "args": "target.arguments",
+            "env": "target.environment"
+          }
+        }
+      },
+      "launch": {
+        "process": {
+          "launch": {
+            "kind": "systemCommand",
+            "commands": [
+              "codelldb"
+            ]
+          }
+        },
+        "transport": "stdio"
+      }
+    }
+  ],
+  "toolDefinitions": [
+    {
+      "id": "cargo",
+      "displayName": "Cargo",
+      "icon": {
+        "host": "plugin"
+      },
+      "category": "build",
+      "executableLayouts": [
+        {
+          "path": "bin/cargo",
+          "platforms": [
+            "macos",
+            "linux"
+          ]
+        },
+        {
+          "path": "bin/cargo.exe",
+          "platforms": [
+            "windows"
+          ]
+        }
+      ],
+      "executables": [
+        {
+          "id": "pinned",
+          "kind": "setting",
+          "settingID": "executable",
+          "layer": "project"
+        },
+        {
+          "id": "project-request",
+          "kind": "toolchain",
+          "scope": "project"
+        },
+        {
+          "id": "default",
+          "kind": "setting",
+          "settingID": "executable",
+          "layer": "global"
+        },
+        {
+          "id": "global-request",
+          "kind": "toolchain",
+          "scope": "global"
+        },
+        {
+          "id": "cargo-home",
+          "kind": "environment",
+          "variable": "CARGO_HOME",
+          "path": "bin/cargo",
+          "platforms": [
+            "macos",
+            "linux"
+          ]
+        },
+        {
+          "id": "cargo-home-windows",
+          "kind": "environment",
+          "variable": "CARGO_HOME",
+          "path": "bin/cargo.exe",
+          "platforms": [
+            "windows"
+          ]
+        },
+        {
+          "id": "shell",
+          "kind": "command",
+          "command": "cargo"
+        },
+        {
+          "id": "detected",
+          "kind": "toolchain",
+          "scope": "installed"
+        }
+      ],
+      "version": {
+        "arguments": [
+          "--version"
+        ],
+        "pattern": "cargo (\\d+(?:\\.\\d+)*)"
+      },
+      "discovery": [
+        {
+          "root": {
+            "kind": "home"
+          },
+          "pattern": ".cargo"
+        },
+        {
+          "root": {
+            "kind": "absolute",
+            "path": "/opt/homebrew/Cellar"
+          },
+          "pattern": "rust/*",
+          "platforms": [
+            "macos"
+          ]
+        },
+        {
+          "root": {
+            "kind": "absolute",
+            "path": "/usr/local/Cellar"
+          },
+          "pattern": "rust/*",
+          "platforms": [
+            "macos"
+          ]
+        },
+        {
+          "root": {
+            "kind": "absolute",
+            "path": "/home/linuxbrew/.linuxbrew/Cellar"
+          },
+          "pattern": "rust/*",
+          "platforms": [
+            "linux"
+          ]
+        }
+      ],
+      "homeVariable": "CARGO_HOME",
+      "commands": [
+        "cargo"
+      ],
+      "pathPrepend": [
+        "${home}/bin"
+      ],
+      "launch": [
+        "${executable}",
+        "${arguments}"
+      ]
+    },
+    {
+      "id": "rust-analyzer",
+      "displayName": "rust-analyzer",
+      "icon": {
+        "host": "plugin"
+      },
+      "executableLayouts": [
+        {
+          "path": "bin/rust-analyzer",
+          "platforms": [
+            "macos",
+            "linux"
+          ]
+        },
+        {
+          "path": "bin/rust-analyzer.exe",
+          "platforms": [
+            "windows"
+          ]
+        }
+      ],
+      "executables": [
+        {
+          "id": "pinned",
+          "kind": "setting",
+          "settingID": "executable",
+          "layer": "project"
+        },
+        {
+          "id": "project-request",
+          "kind": "toolchain",
+          "scope": "project"
+        },
+        {
+          "id": "default",
+          "kind": "setting",
+          "settingID": "executable",
+          "layer": "global"
+        },
+        {
+          "id": "global-request",
+          "kind": "toolchain",
+          "scope": "global"
+        },
+        {
+          "id": "cargo-home",
+          "kind": "environment",
+          "variable": "CARGO_HOME",
+          "path": "bin/rust-analyzer",
+          "platforms": [
+            "macos",
+            "linux"
+          ]
+        },
+        {
+          "id": "cargo-home-windows",
+          "kind": "environment",
+          "variable": "CARGO_HOME",
+          "path": "bin/rust-analyzer.exe",
+          "platforms": [
+            "windows"
+          ]
+        },
+        {
+          "id": "shell",
+          "kind": "command",
+          "command": "rust-analyzer"
+        },
+        {
+          "id": "detected",
+          "kind": "toolchain",
+          "scope": "installed"
+        }
+      ],
+      "version": {
+        "arguments": [
+          "--version"
+        ],
+        "pattern": "rust-analyzer (\\d+(?:\\.\\d+)*)"
+      },
+      "discovery": [
+        {
+          "root": {
+            "kind": "home"
+          },
+          "pattern": ".cargo"
+        },
+        {
+          "root": {
+            "kind": "absolute",
+            "path": "/opt/homebrew/Cellar"
+          },
+          "pattern": "rust-analyzer/*",
+          "platforms": [
+            "macos"
+          ]
+        },
+        {
+          "root": {
+            "kind": "absolute",
+            "path": "/usr/local/Cellar"
+          },
+          "pattern": "rust-analyzer/*",
+          "platforms": [
+            "macos"
+          ]
+        },
+        {
+          "root": {
+            "kind": "absolute",
+            "path": "/home/linuxbrew/.linuxbrew/Cellar"
+          },
+          "pattern": "rust-analyzer/*",
+          "platforms": [
+            "linux"
+          ]
+        }
+      ],
+      "homeVariable": "CARGO_HOME",
+      "commands": [
+        "rust-analyzer"
+      ],
+      "pathPrepend": [
+        "${home}/bin"
+      ],
+      "launch": [
+        "${executable}",
+        "${arguments}"
+      ]
+    },
+    {
+      "id": "rustup",
+      "displayName": "rustup",
+      "icon": {
+        "host": "plugin"
+      },
+      "category": "runtime",
+      "executableLayouts": [
+        {
+          "path": "bin/rustup",
+          "platforms": [
+            "macos",
+            "linux"
+          ]
+        },
+        {
+          "path": "bin/rustup.exe",
+          "platforms": [
+            "windows"
+          ]
+        }
+      ],
+      "executables": [
+        {
+          "id": "pinned",
+          "kind": "setting",
+          "settingID": "executable",
+          "layer": "project"
+        },
+        {
+          "id": "project-request",
+          "kind": "toolchain",
+          "scope": "project"
+        },
+        {
+          "id": "default",
+          "kind": "setting",
+          "settingID": "executable",
+          "layer": "global"
+        },
+        {
+          "id": "global-request",
+          "kind": "toolchain",
+          "scope": "global"
+        },
+        {
+          "id": "cargo-home",
+          "kind": "environment",
+          "variable": "CARGO_HOME",
+          "path": "bin/rustup",
+          "platforms": [
+            "macos",
+            "linux"
+          ]
+        },
+        {
+          "id": "cargo-home-windows",
+          "kind": "environment",
+          "variable": "CARGO_HOME",
+          "path": "bin/rustup.exe",
+          "platforms": [
+            "windows"
+          ]
+        },
+        {
+          "id": "shell",
+          "kind": "command",
+          "command": "rustup"
+        },
+        {
+          "id": "detected",
+          "kind": "toolchain",
+          "scope": "installed"
+        }
+      ],
+      "version": {
+        "arguments": [
+          "--version"
+        ],
+        "pattern": "rustup (\\d+(?:\\.\\d+)*)"
+      },
+      "discovery": [
+        {
+          "root": {
+            "kind": "home"
+          },
+          "pattern": ".cargo"
+        },
+        {
+          "root": {
+            "kind": "absolute",
+            "path": "/opt/homebrew/Cellar"
+          },
+          "pattern": "rustup/*",
+          "platforms": [
+            "macos"
+          ]
+        },
+        {
+          "root": {
+            "kind": "absolute",
+            "path": "/usr/local/Cellar"
+          },
+          "pattern": "rustup/*",
+          "platforms": [
+            "macos"
+          ]
+        },
+        {
+          "root": {
+            "kind": "absolute",
+            "path": "/home/linuxbrew/.linuxbrew/Cellar"
+          },
+          "pattern": "rustup/*",
+          "platforms": [
+            "linux"
+          ]
+        }
+      ],
+      "homeVariable": "CARGO_HOME",
+      "commands": [
+        "rustup"
+      ],
+      "pathPrepend": [
+        "${home}/bin"
+      ],
+      "launch": [
+        "${executable}",
+        "${arguments}"
+      ]
+    }
+  ],
+  "projectGenerators": [
+    {
+      "id": "cargo-package",
+      "displayName": "Rust",
+      "description": "A Rust package built with Cargo.",
+      "section": "project",
+      "order": 40,
+      "icon": {
+        "path": "icons/rust.svg",
+        "darkPath": "icons/rust-dark.svg",
+        "mode": "original"
+      },
+      "fields": [
+        {
+          "id": "cargo",
+          "type": "tool",
+          "title": "Cargo",
+          "description": "The Cargo the project builds and runs with. The project keeps this choice.",
+          "tool": "cargo",
+          "pinAs": "project",
+          "optional": true
+        },
+        {
+          "id": "crateKind",
+          "type": "enum",
+          "title": "Crate",
+          "default": "binary",
+          "presentation": "segmented",
+          "options": [
+            {
+              "value": "binary",
+              "title": "Binary"
+            },
+            {
+              "value": "library",
+              "title": "Library"
+            }
+          ]
+        },
+        {
+          "id": "packageName",
+          "type": "text",
+          "title": "Package name",
+          "description": "The name line of Cargo.toml: what other packages depend on and what the program is called.",
+          "default": "${project.name|lower}",
+          "pattern": "[A-Za-z][A-Za-z0-9_-]*",
+          "maxLength": 64
+        },
+        {
+          "id": "edition",
+          "type": "enum",
+          "title": "Edition",
+          "advanced": true,
+          "description": "The Rust edition the package is written in. Edition 2024 needs Rust 1.85 or newer.",
+          "default": "2024",
+          "options": [
+            {
+              "value": "2024",
+              "title": "2024"
+            },
+            {
+              "value": "2021",
+              "title": "2021"
+            }
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "languageID": "rust"
+        },
+        {
+          "buildSystemID": "cargo"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "files",
+          "source": "templates/rust/package"
+        },
+        {
+          "kind": "files",
+          "source": "templates/rust/binary",
+          "when": {
+            "field": "crateKind",
+            "equals": "binary"
+          }
+        },
+        {
+          "kind": "files",
+          "source": "templates/rust/library",
+          "when": {
+            "field": "crateKind",
+            "equals": "library"
+          }
+        }
+      ],
+      "openFiles": [
+        {
+          "path": "src/main.rs",
+          "when": {
+            "field": "crateKind",
+            "equals": "binary"
+          }
+        },
+        {
+          "path": "src/lib.rs",
+          "when": {
+            "field": "crateKind",
+            "equals": "library"
+          }
+        }
+      ]
+    }
+  ],
+  "commandInstallers": [
+    {
+      "id": "codelldb",
+      "commands": [
+        "codelldb"
+      ],
+      "download": {
+        "version": "1.12.3",
+        "artifacts": [
+          {
+            "os": "linux",
+            "arch": "arm64",
+            "url": "https://github.com/vadimcn/codelldb/releases/download/v1.12.3/codelldb-linux-arm64.vsix",
+            "sha256": "0887f67d440554617894266f80706b700907c36b95e6e49d23b95a0e05318101",
+            "archive": "zip"
+          },
+          {
+            "os": "linux",
+            "arch": "x86_64",
+            "url": "https://github.com/vadimcn/codelldb/releases/download/v1.12.3/codelldb-linux-x64.vsix",
+            "sha256": "1cd7f386598022b51a5b93b9ffa23e812b23f519cfe1833384ec4bef4bfd1be1",
+            "archive": "zip"
+          },
+          {
+            "os": "macos",
+            "arch": "arm64",
+            "url": "https://github.com/vadimcn/codelldb/releases/download/v1.12.3/codelldb-darwin-arm64.vsix",
+            "sha256": "2f114a990e1b368dd1dbd33c80c0e719767af2d228391ec0df0571c957f9ac91",
+            "archive": "zip"
+          },
+          {
+            "os": "macos",
+            "arch": "x86_64",
+            "url": "https://github.com/vadimcn/codelldb/releases/download/v1.12.3/codelldb-darwin-x64.vsix",
+            "sha256": "e25cc716b94c62c07fec268ff2785d2b797245b160502baef8b9c970a0c4d8e8",
+            "archive": "zip"
+          },
+          {
+            "os": "windows",
+            "arch": "x86_64",
+            "url": "https://github.com/vadimcn/codelldb/releases/download/v1.12.3/codelldb-win32-x64.vsix",
+            "sha256": "a916e509308dac817732f63ca604a8b93ed29cd16f38a2fa9f0b64ed58e8f51a",
+            "archive": "zip"
+          }
+        ]
+      },
+      "mayUseNetwork": true,
+      "timeoutSeconds": 3600,
+      "targets": {
+        "managed": {
+          "commandDirectory": "extension/adapter"
+        }
+      }
+    }
+  ],
+  "backend": {
+    "launch": {
+      "kind": "packaged",
+      "path": "bin/backend"
+    }
+  }
+}

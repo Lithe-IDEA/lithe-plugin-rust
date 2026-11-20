@@ -1,0 +1,6 @@
+[package]
+name = "{{ field.packageName }}"
+version = "0.1.0"
+edition = "{{ field.edition }}"
+
+[dependencies]

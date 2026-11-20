@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Lithe-IDEA/Lithe-core-rust/main/shared/plugins/contract/v1/plugin-l10n.schema.json",
+  "settings": {
+    "checkOnSave": {
+      "title": "保存时检查",
+      "description": "每次保存 Rust 文件时运行 Cargo 检查，把结果显示为诊断。"
+    },
+    "checkCommand": {
+      "title": "检查命令",
+      "description": "保存时检查运行的 Cargo 命令。Clippy 会多报告它的 lint，耗时更长。",
+      "options": {
+        "check": "cargo check",
+        "clippy": "cargo clippy"
+      }
+    },
+    "installRustAnalyzer": {
+      "title": "用 rustup 安装 rust-analyzer",
+      "description": "项目的 rustup 工具链缺少 rust-analyzer 时，先用 rustup component add 安装 rust-analyzer 和 rust-src，再启动它。"
+    }
+  },
+  "buildOptions": {
+    "cargo": {
+      "release": {
+        "displayName": "Release 配置",
+        "description": "用 release 配置构建：开启优化、关闭调试断言。程序输出到 target/release。"
+      },
+      "features": {
+        "displayName": "特性",
+        "description": "要开启的特性，按软件包列出。命令只传入它所构建的软件包的特性。"
+      },
+      "allFeatures": {
+        "displayName": "全部特性",
+        "description": "开启命令所构建的软件包的全部特性，忽略上面选择的特性。"
+      },
+      "noDefaultFeatures": {
+        "displayName": "不含默认特性",
+        "description": "不开启各软件包的默认特性，只开启选择的特性。"
+      },
+      "offline": {
+        "displayName": "离线",
+        "description": "不使用网络，只用 Cargo 已经下载的内容构建。"
+      }
+    }
+  }
+}

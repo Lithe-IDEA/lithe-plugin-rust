@@ -1,0 +1,14 @@
+Rust Support icons
+
+rust.svg and rust-dark.svg are icons from JetBrains IntelliJ Community
+(https://github.com/JetBrains/intellij-community), licensed under the Apache
+License, Version 2.0. A copy of the license is in LICENSE-Apache-2.0.txt next to
+this file.
+
+Sources, at intellij-community master d692c46cf35d140f1cde24e8cdaf70cc4e2bd271:
+
+- platform/icons/src/language/rust.svg and rust_dark.svg
+  (last changed in 7a8451c94dca0baee87b81976a42f39dd66480f7)
+  Copyright 2000-2024 JetBrains s.r.o. and contributors.
+
+The files are unchanged; rust_dark.svg is renamed rust-dark.svg.

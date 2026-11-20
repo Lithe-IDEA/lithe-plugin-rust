@@ -1,0 +1,29 @@
+[package]
+name = "rust-support-backend"
+# Kept equal to the plugin's version; scripts/package.mjs refuses a mismatch.
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+rust-version = "1.87"
+publish = false
+description = "The Cargo build provider of the Rust Support plugin for Lithe."
+
+[[bin]]
+name = "backend"
+path = "src/main.rs"
+
+[dependencies]
+# The Rust plugin SDK has no release tag yet; this is Lithe-core-rust main with
+# the build provider interface (Lithe-core-rust#117).
+lithe-plugin-sdk = { git = "https://github.com/Lithe-IDEA/Lithe-core-rust", rev = "06a4c7976efcc4ef06fb364a966777390c58df14" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+opt-level = "s"

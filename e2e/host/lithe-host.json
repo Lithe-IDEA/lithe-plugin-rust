@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/1lck/Lithe-IDEA.git",
+  "revision": "7204b1ae6074126a5c42ad734e281a0a9c733a85",
+  "timeout": "90m",
+  "packages": {
+    "./internal/projectgen": "^TestRustPlugin",
+    "./internal/workbench": "^TestRustSupportPlugin(BuildsAndServesAPackage|DownloadsCodeLLDBAndDebugsAProgram)$"
+  },
+  "requiredEnvironment": {
+    "LITHE_TEST_RUST_PLUGIN_ARCHIVE": "rust-support-<version>-darwin.zip to install, for example dist/rust-support-0.1.0-darwin.zip"
+  },
+  "repositoryEnvironment": {
+    "LITHE_PLUGIN_RUST_DIR": "io.github.lithe-idea.rust-support"
+  }
+}

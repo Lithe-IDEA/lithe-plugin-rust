@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # The backend, the Cargo build provider that also starts rust-analyzer, built
+  # for each archive on the system that links it: a universal binary on macOS,
+  # x64 and ARM64 (cross-built with the MSVC ARM64 tools) on Windows. Its unit
+  # tests run where the runner can execute what it builds.
+  backend:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: darwin
+            os: macos-latest
+            targets: aarch64-apple-darwin x86_64-apple-darwin
+            test: true
+          - platform: windows-x64
+            os: windows-latest
+            targets: x86_64-pc-windows-msvc
+            test: true
+          - platform: windows-arm64
+            os: windows-latest
+            targets: aarch64-pc-windows-msvc
+            test: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the Rust targets
+        shell: bash
+        run: rustup target add ${{ matrix.targets }}
+      - name: Test the backend
+        if: matrix.test
+        working-directory: backend
+        run: cargo test --locked
+      - name: Build the backend
+        run: node scripts/build-backend.mjs ${{ matrix.platform }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-${{ matrix.platform }}
+          path: .artifacts/backend-${{ matrix.platform }}
+          if-no-files-found: error
+
+  package:
+    needs: backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: backend-*
+          path: .artifacts
+      - name: Check manifest and build the archives
+        run: node scripts/package.mjs
+      - name: Verify release archives
+        run: node --test --test-timeout=60000 scripts/package/*.test.mjs
+      - name: Validate against Lithe Store rules
+        run: |
+          git clone --depth 1 https://github.com/Lithe-IDEA/Lithe-store "$RUNNER_TEMP/store"
+          node --input-type=module -e "
+            import { readPackageManifests, checkManifest } from '$RUNNER_TEMP/store/scripts/validate-index.mjs';
+            import { readdirSync, readFileSync } from 'node:fs';
+            const manifest = JSON.parse(readFileSync('io.github.lithe-idea.rust-support/plugin.json', 'utf8'));
+            const entry = { id: manifest.id };
+            let failed = false;
+            for (const name of readdirSync('dist')) {
+              const { manifests, unsafe } = readPackageManifests('dist/' + name, entry.id);
+              const problems = [...unsafe, ...checkManifest(manifests, entry, manifest)];
+              for (const problem of problems) { console.error(name + ': ' + problem); failed = true; }
+            }
+            process.exit(failed ? 1 : 0);
+          "
