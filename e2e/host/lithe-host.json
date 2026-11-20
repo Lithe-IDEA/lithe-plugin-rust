@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/1lck/Lithe-IDEA.git",
-  "revision": "7204b1ae6074126a5c42ad734e281a0a9c733a85",
+  "revision": "a6afaafec661d92e4177d471c9120d3e861c2b23",
   "timeout": "90m",
   "packages": {
     "./internal/projectgen": "^TestRustPlugin",

@@ -20,9 +20,9 @@
 
 | ID | 能力 | macOS | Windows | 最近验证 |
 | --- | --- | --- | --- | --- |
-| `rust-support-plugin` | rust-analyzer 代码智能，Cargo 构建、运行和依赖，cargo / rustup / rust-analyzer 工具定义 | implemented / pending | implemented / pending | 2026-11-20 macOS workbench 集成测试通过；Windows 后端只在 CI 构建，没有在 Windows 版 Lithe 里运行过 |
+| `rust-support-plugin` | rust-analyzer 代码智能，Cargo 构建、运行和依赖，cargo / rustup / rust-analyzer 工具定义 | implemented / pending | implemented / pending | 2026-11-21 macOS workbench 集成测试通过；Windows 后端只在 CI 构建，没有在 Windows 版 Lithe 里运行过 |
 | `rust-debug-codelldb` | 用按需下载的 CodeLLDB 调试二进制和示例 | implemented / pending | partial / pending | 2026-11-21 macOS workbench 集成测试通过；Windows 没有运行过；Windows ARM64 没有 CodeLLDB 包 |
-| `rust-project-generator` | 「新建项目」里的 Rust（Cargo 软件包），Cargo 选择 | implemented / pending | implemented / pending | 2026-11-20 macOS 宿主集成测试通过；Windows 没有运行过 |
+| `rust-project-generator` | 「新建项目」里的 Rust（Cargo 软件包），Cargo 选择 | implemented / pending | implemented / pending | 2026-11-21 macOS 宿主集成测试通过；Windows 没有运行过 |
 
 ## rust-support-plugin
 
@@ -62,7 +62,7 @@ rustup 安装的 cargo 是指向 `rustup` 的符号链接，按启动时的名�
 - 和 `lithe-plugin-cargo` 都声明了 `cargo` 构建系统，不要同时启用。
 - 构建选项、插件设置的名称和说明有中文；工具定义、调试适配器和新建项目字段的名称插件语言文件还不能翻译。
 
-**最近验证**：2026-11-20，macOS（Apple Silicon），插件 0.1.0 本地包，宿主 `035f3c5`，Core 为 Lithe-core-rust#135 的分支提交 `8291f3c`，rustup 默认工具链 1.100.0。
+**最近验证**：2026-11-21，macOS（Apple Silicon），插件 0.1.0 本地包，宿主 main `a6afaaf`（含 1lck/Lithe-IDEA#2241、#2242，固定 Core `8291f3c`，即 Lithe-core-rust#135），rustup 默认工具链 1.100.0。
 `TestRustSupportPluginBuildsAndServesAPackage` 通过：构建窗口的模型列出软件包 `hello`，Build 在 `target/debug` 留下程序，
 运行二进制和示例输出正确；Features 选项列出 `hello/loud`，保存后运行带上 `--features hello/loud`；
 rust-analyzer 经 `rustAnalyzer.launch` 从 rustup 默认工具链启动，对不存在的函数报出诊断。没有做下面的手工验收。
@@ -113,8 +113,8 @@ CodeLLDB 不在插件包里：缺少 `codelldb` 时，插件详情的调试能�
 插件契约现在没有把这种路径对应关系交给 launch 的绑定（`target.pathMappings` 只用于 attach）。
 适配器名称 Rust (CodeLLDB) 目前不能翻译：插件语言文件还不覆盖调试适配器。
 
-**最近验证**：2026-11-21，macOS（Apple Silicon），插件 0.1.0 本地包，宿主 `035f3c5`，Core 为 Lithe-core-rust#135 的分支提交 `8291f3c`：
-`TestRustSupportPluginDownloadsCodeLLDBAndDebugsAProgram` 通过（582 秒，大部分是下载）。安装前「功能」只缺 `codelldb`，
+**最近验证**：2026-11-21，macOS（Apple Silicon），插件 0.1.0 本地包，宿主 main `a6afaaf`（含 1lck/Lithe-IDEA#2241、#2242，固定 Core `8291f3c`，即 Lithe-core-rust#135）：
+`TestRustSupportPluginDownloadsCodeLLDBAndDebugsAProgram` 通过。安装前「功能」只缺 `codelldb`，
 安装器给出固定的 CodeLLDB 1.12.3 地址和 SHA-256，下载、校验后装进插件状态目录，不在插件包里，装好后不再缺少；
 在 `main` 里的一行设断点，构建窗口的「调试」先构建，程序停在 `src/main.rs:3`，调用栈顶是 `main`，变量里有局部变量 `name`；
 「继续」后程序结束，调试控制台有程序的输出；插件包的文件和哈希不变。测试从解析掉符号链接的临时目录打开软件包（见“限制”）。
@@ -153,7 +153,7 @@ Edition 2024（默认）或 2021。由模板写出 `Cargo.toml` 和忽略 `/targ
 
 **限制**：字段名称只有英文，插件语言文件还不能翻译新建项目的字段；不生成工作区（多个软件包）。
 
-**最近验证**：2026-11-20，macOS（Apple Silicon），插件 0.1.0 本地包，宿主 `035f3c5`，Core 为 Lithe-core-rust#135 的分支提交 `8291f3c`。
+**最近验证**：2026-11-21，macOS（Apple Silicon），插件 0.1.0 本地包，宿主 main `a6afaaf`（含 1lck/Lithe-IDEA#2241、#2242，固定 Core `8291f3c`，即 Lithe-core-rust#135）。
 四个 projectgen 测试全部通过：生成的二进制软件包能 `cargo run` 并打印 `Hello, Rustacean!`，库软件包的 `cargo test` 通过，
 项目固定的 Cargo 来自工具定义找到的安装，带空格的软件包名被表单拒绝。没有做下面的手工验收。
 
