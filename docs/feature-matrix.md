@@ -220,7 +220,7 @@ Edition 2024（默认）或 2021。由模板写出 `Cargo.toml` 和忽略 `/targ
 `TestRustSupportPluginDrawsItsSettingsRegions` 通过：后端由宿主启动，两个区域在中英文下按区域宽度（610、340）各画出工具行和一张画布，
 声明 `resize`、不写 `pan`；clippy 草稿让保存时检查卡片换成 clippy 的说明并标出未应用的修改；以 760 发 `resize` 后按新宽度重画，
 草稿标记仍在；安装目录的文件不变。同一次运行里另外两个 workbench 测试（构建和语言服务、CodeLLDB 调试）和四个 projectgen 测试也通过。另把后端画出的场景放进插件 e2e 覆盖层里的宿主无头界面截图（浅色和深色，中英文，默认值、草稿和 Cargo 页），
-见 README 的“设置预览”。没有做手工验收。
+README 的“设置预览”放了其中的中文截图。没有做手工验收。
 
 **验证方法**（macOS）：
 

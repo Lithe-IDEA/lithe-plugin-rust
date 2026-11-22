@@ -96,24 +96,18 @@ Lithe 在 `~/.cargo`、Homebrew（`/opt/homebrew/Cellar`、`/usr/local/Cellar`�
 | 高亮文档注释中的代码 | 文档注释里的 Rust 代码和 `` [`i32`] `` 链接按源码着色 | 文档注释整段是注释颜色 |
 | 保存时检查 | `cargo check` 报告未使用变量；改成 `cargo clippy` 时另外报告 `len_zero` lint | 只显示 rust-analyzer 自己的诊断 |
 
-| 中文、深色 | 英文、浅色 |
-| --- | --- |
-| <img src="docs/assets/settings-previews/language-zh-Hans-dark.png" alt="Rust 语言设置页的工具链和效果预览，中文、深色外观" width="420"> | <img src="docs/assets/settings-previews/language-en-light.png" alt="Rust language settings page with the toolchain rows and the preview, English, light appearance" width="420"> |
+<img src="docs/assets/settings-previews/language-zh-Hans-dark.png" alt="Rust 语言设置页的工具链和效果预览，深色外观" width="720">
 
 改了还没应用的选项会先在预览里显示：改动的卡片加上强调色边框和圆点，预览右上角标出“含未应用的修改”，
-保存之后才写进设置。下面两张图关掉了三个开关、把检查命令改成 `cargo clippy`，还没有应用：
+保存之后才写进设置。下图关掉了三个开关、把检查命令改成 `cargo clippy`，还没有应用：
 
-| 中文、浅色 | 英文、深色 |
-| --- | --- |
-| <img src="docs/assets/settings-previews/language-zh-Hans-draft-light.png" alt="改了还没应用的选项先显示在预览里，标出含未应用的修改" width="420"> | <img src="docs/assets/settings-previews/language-en-draft-dark.png" alt="Options changed but not applied show in the preview first, marked as not applied yet" width="420"> |
+<img src="docs/assets/settings-previews/language-zh-Hans-draft-light.png" alt="改了还没应用的选项先显示在预览里，标出含未应用的修改，浅色外观" width="720">
 
 **Cargo 构建工具页**：先列出构建用的 cargo，再画出 Lithe 查找 cargo 的三步（项目环境、全局默认、自动发现），
 cargo 是 rustup 的代理时 rustup 怎样选 Rust 版本（按目录覆盖、`rust-toolchain.toml`、默认工具链），以及这个 cargo 用于读取项目、
 构建、检查、运行和调试。插件在这一页没有设置项；要换 cargo，点击 cargo 那一行到「工具链」页选择。
 
-| 中文、浅色 | 英文、深色 |
-| --- | --- |
-| <img src="docs/assets/settings-previews/cargo-zh-Hans-light.png" alt="Cargo 构建工具页画出 Lithe 查找 cargo 的顺序" width="420"> | <img src="docs/assets/settings-previews/cargo-en-dark.png" alt="The Cargo build tool page shows the order in which Lithe looks for cargo" width="420"> |
+<img src="docs/assets/settings-previews/cargo-zh-Hans-light.png" alt="Cargo 构建工具页画出 Lithe 查找 cargo 的顺序，浅色外观" width="720">
 
 截图用宿主的无头界面画出，路径和版本是测试数据。
 
