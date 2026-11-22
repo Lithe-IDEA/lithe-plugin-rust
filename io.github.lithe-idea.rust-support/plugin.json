@@ -2,7 +2,7 @@
   "schemaVersion": 0,
   "id": "io.github.lithe-idea.rust-support",
   "displayName": "Rust Support",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "pluginAPIVersion": 0,
   "requires": {
     "backend": 0,
@@ -14,7 +14,8 @@
     "languages": 0,
     "projectGenerators": 0,
     "settings": 0,
-    "toolDefinitions": 1
+    "toolDefinitions": 1,
+    "ui": 0
   },
   "requiresTools": [
     "cargo",
@@ -33,6 +34,7 @@
     "languageServer.launch",
     "process.build",
     "project.generate",
+    "ui.contribute",
     "workspace.metadata"
   ],
   "activationEvents": [
@@ -76,6 +78,40 @@
       ]
     },
     {
+      "id": "procMacro",
+      "type": "boolean",
+      "title": "Expand procedural macros",
+      "description": "Build and run procedural macros such as derive(Serialize) and #[tokio::main], so the code they generate takes part in completion, navigation and type inference. Build scripts run too while this is on.",
+      "default": true,
+      "page": {
+        "languageID": "rust"
+      },
+      "section": "rust-analyzer"
+    },
+    {
+      "id": "buildScripts",
+      "type": "boolean",
+      "title": "Run build scripts",
+      "description": "Run each package's build.rs so the code it generates into OUT_DIR and the cfg flags it sets are analyzed. Build scripts still run while Expand procedural macros is on.",
+      "default": true,
+      "page": {
+        "languageID": "rust"
+      },
+      "section": "rust-analyzer"
+    },
+    {
+      "id": "docCommentInject",
+      "type": "boolean",
+      "title": "Highlight code in doc comments",
+      "description": "Highlight the Rust code in doc comment examples, and links to items, as source code.",
+      "default": true,
+      "effect": "immediate",
+      "page": {
+        "languageID": "rust"
+      },
+      "section": "rust-analyzer"
+    },
+    {
       "id": "installRustAnalyzer",
       "type": "boolean",
       "title": "Install rust-analyzer with rustup",
@@ -85,6 +121,48 @@
         "languageID": "rust"
       },
       "section": "rust-analyzer"
+    }
+  ],
+  "settingRegions": [
+    {
+      "id": "language",
+      "page": {
+        "languageID": "rust"
+      },
+      "keywords": [
+        "rust-analyzer",
+        "toolchain",
+        "proc macro",
+        "macro expansion",
+        "build script",
+        "OUT_DIR",
+        "doc comment",
+        "highlighting",
+        "check on save",
+        "clippy",
+        "preview"
+      ],
+      "view": {
+        "function": "settings.view"
+      }
+    },
+    {
+      "id": "cargo",
+      "page": {
+        "buildSystemID": "cargo"
+      },
+      "keywords": [
+        "cargo executable",
+        "toolchain",
+        "lookup order",
+        "rustup",
+        "rust-toolchain.toml",
+        "CARGO_HOME",
+        "PATH"
+      ],
+      "view": {
+        "function": "settings.view"
+      }
     }
   ],
   "languages": [
@@ -119,6 +197,23 @@
           "checkOnSave": "${setting:checkOnSave}",
           "check": {
             "command": "${setting:checkCommand}"
+          },
+          "procMacro": {
+            "enable": "${setting:procMacro}"
+          },
+          "cargo": {
+            "buildScripts": {
+              "enable": "${setting:buildScripts}"
+            }
+          },
+          "semanticHighlighting": {
+            "doc": {
+              "comment": {
+                "inject": {
+                  "enable": "${setting:docCommentInject}"
+                }
+              }
+            }
           }
         }
       }

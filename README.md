@@ -2,23 +2,30 @@
 
 为 [Lithe](https://github.com/1lck/Lithe-IDEA) 提供 Rust 支持：用 rustup 装的 `rust-analyzer` 提供代码智能，
 用 Cargo 识别软件包和工作区，在构建窗口里列出软件包和目标，运行 Build、Check、Clippy、Doc 和 Clean，
-运行二进制和示例，查看依赖树；用 CodeLLDB 调试，CodeLLDB 在第一次需要时由 Lithe 下载；在「新建项目」里创建 Cargo 软件包。
+运行二进制和示例，查看依赖树；用 CodeLLDB 调试，CodeLLDB 在第一次需要时由 Lithe 下载；在「新建项目」里创建 Cargo 软件包；
+在 Rust 语言设置页和 Cargo 构建工具页画出设置的效果预览。
 这是一个**社区插件**，按插件契约 v0 编写。插件包含一份 `plugin.json`、几份项目模板，和一个用 Rust SDK 写的后端；
 cargo、rustup 和 rust-analyzer 用你电脑上的。
 
 > English: Rust support for Lithe — code intelligence through the rust-analyzer of your rustup toolchain, Cargo
 > packages and workspaces in the build window (model, Build, Check, Clippy, Doc, Clean, running binaries and
-> examples, the dependency tree), debugging with CodeLLDB, which Lithe downloads the first time you debug, and a
-> Rust package entry in New Project. The plugin is a `plugin.json`, a few project templates and a backend written
-> with the Rust plugin SDK; cargo, rustup and rust-analyzer stay your own.
+> examples, the dependency tree), debugging with CodeLLDB, which Lithe downloads the first time you debug, a
+> Rust package entry in New Project, and previews on the Rust and Cargo settings pages that show what the options
+> change. The plugin is a `plugin.json`, a few project templates and a backend written with the Rust plugin SDK;
+> cargo, rustup and rust-analyzer stay your own.
 
 > **兼容性**：按插件契约 v0（`schemaVersion: 0`、`pluginAPIVersion: 0`）编写，只能装进新版 Lithe 桌面端
-> （`desktop-v*` 预发布），旧版 macOS Lithe 无法安装。下载 CodeLLDB 用的是下载型命令安装器
+> （`desktop-v*` 版本），旧版 macOS Lithe 无法安装。下载 CodeLLDB 用的是下载型命令安装器
 > （[1lck/Lithe-IDEA#2241](https://github.com/1lck/Lithe-IDEA/pull/2241)，固定了
-> [Lithe-core-rust#133](https://github.com/Lithe-IDEA/Lithe-core-rust/pull/133) 的 Core），桌面端 0.8.11 还没有它，
-> 会拒绝安装这个插件；0.1.0 因此作为预发布版本发布。rustup 装的 `cargo` 和 `rust-analyzer` 是指向 `rustup` 的链接，
-> 工具定义要在 macOS 上找到它们，需要固定了 [Lithe-core-rust#135](https://github.com/Lithe-IDEA/Lithe-core-rust/pull/135)
-> 的桌面端（[1lck/Lithe-IDEA#2242](https://github.com/1lck/Lithe-IDEA/pull/2242)）。
+> [Lithe-core-rust#133](https://github.com/Lithe-IDEA/Lithe-core-rust/pull/133) 的 Core），桌面端 0.8.11 及更早版本没有它，
+> 会拒绝安装这个插件；0.1.0 发布时还没有包含它的桌面端，因此作为预发布版本发布。rustup 装的 `cargo` 和 `rust-analyzer`
+> 是指向 `rustup` 的链接，工具定义要在 macOS 上找到它们，需要固定了
+> [Lithe-core-rust#135](https://github.com/Lithe-IDEA/Lithe-core-rust/pull/135) 的桌面端
+> （[1lck/Lithe-IDEA#2242](https://github.com/1lck/Lithe-IDEA/pull/2242)）。桌面端 0.8.12 起包含这两项。
+> 0.1.1 在 Rust 语言设置页和 Cargo 构建工具页加了插件自己画的预览区域（`settingRegions`），需要支持插件视图的桌面端
+> （[1lck/Lithe-IDEA#2183](https://github.com/1lck/Lithe-IDEA/pull/2183)，桌面端 0.8.7 起包含），预览按设置窗口的实际宽度排版、
+> 窗口变宽变窄时跟着重排，要靠告诉插件视图宽度的桌面端（[1lck/Lithe-IDEA#2191](https://github.com/1lck/Lithe-IDEA/pull/2191)，
+> 桌面端 0.8.10 起包含）。它们都在 0.8.12 里，所以 0.1.1 需要桌面端 0.8.12 或更新版本，作为正式版本发布。
 
 本插件取代 `lithe-plugin-cargo`：Cargo 构建系统并入这里，那个插件不再维护。两个插件都声明了 `cargo` 构建系统，
 不要同时启用。
@@ -37,6 +44,7 @@ cargo、rustup 和 rust-analyzer 用你电脑上的。
 | 调试 | 构建窗口里二进制和示例的「调试」：先构建，再用 CodeLLDB 启动程序，支持断点、单步、调用栈、变量，程序输出显示在调试控制台 |
 | 新建项目 | 「新建项目」里的 Rust：选择 Cargo，选二进制或库，生成 `Cargo.toml`、`.gitignore` 和 `src/main.rs` 或 `src/lib.rs`，不运行 `cargo new` |
 | 工具链 | 在常见位置找到 cargo、rustup 和 rust-analyzer；项目可以固定用其中一个 Cargo 构建和运行 |
+| 设置预览 | Rust 语言设置页顶部列出 Lithe 用的 cargo、rust-analyzer 和 rustup，下面的预览画出过程宏展开、构建脚本、文档注释高亮和保存时检查在编辑器里的效果；Cargo 构建工具页画出 Lithe 查找 cargo 的顺序和 rustup 怎样选 Rust 版本。改了还没应用的选项会先在预览里显示，并标出“含未应用的修改”，见下文“设置预览” |
 
 ## 设置和构建选项
 
@@ -46,9 +54,15 @@ cargo、rustup 和 rust-analyzer 用你电脑上的。
 | --- | --- | --- |
 | Check on save | 立即 | 保存 Rust 文件时运行 Cargo 检查，把结果显示为诊断 |
 | Check command | 立即 | 保存时检查用 `cargo check` 还是 `cargo clippy`；Clippy 多报告它的 lint，耗时更长 |
+| Expand procedural macros | 下次启动语言服务器 | 编译并运行过程宏（如 `derive(Serialize)`、`#[tokio::main]`），它们生成的代码才能用于补全、跳转和类型推断。开启时也会运行构建脚本。默认开启 |
+| Run build scripts | 下次启动语言服务器 | 运行各软件包的 `build.rs`，分析它生成到 `OUT_DIR` 的代码和它设置的 cfg。开启 Expand procedural macros 时构建脚本仍会运行。默认开启 |
+| Highlight code in doc comments | 立即 | 像源代码一样高亮文档注释示例里的 Rust 代码和指向条目的链接。默认开启 |
 | Install rust-analyzer with rustup | 下次启动语言服务器 | 项目的 rustup 工具链缺少 rust-analyzer 时，先运行 `rustup component add rust-analyzer rust-src` 再启动它；需要联网 |
 
-前两项通过 `workspace/configuration` 发给正在运行的 rust-analyzer，不需要重启语言服务器。
+Check on save、Check command 和 Highlight code in doc comments 通过 `workspace/configuration` 发给正在运行的
+rust-analyzer，不需要重启语言服务器；其余各项在 rust-analyzer 下次启动时生效。前五项分别对应 rust-analyzer 的
+`checkOnSave`、`check.command`、`procMacro.enable`、`cargo.buildScripts.enable` 和
+`semanticHighlighting.doc.comment.inject.enable`。
 
 **构建选项**（构建窗口 →「构建选项」），只对当前工作区生效：
 
@@ -66,6 +80,42 @@ cargo、rustup 和 rust-analyzer 用你电脑上的。
 Lithe 在 `~/.cargo`、Homebrew（`/opt/homebrew/Cellar`、`/usr/local/Cellar`，Linux 上是 Linuxbrew）里查找，
 用 `--version` 读出版本，列在这里。构建用的 Cargo 按顺序取第一个可用的：项目固定的 Cargo、全局默认的 Cargo、
 `CARGO_HOME` 里的 `bin/cargo`、`PATH` 里的 `cargo`、找到的安装。选中的 Cargo 所在的 `bin` 目录加到命令的 `PATH` 前面。
+
+## 设置预览
+
+「设置 › 语言与框架 › Rust」页和「设置 › 构建、执行、部署 › 构建工具 › Cargo」页各有一块插件自己画的区域，
+由插件后端按界面语言、浅色或深色外观和设置窗口的宽度画出。预览只是示例代码，不读取打开的项目。
+
+**Rust 语言页**：顶部「工具链」列出 Lithe 为 Rust 用的 cargo、rust-analyzer 和 rustup，点击一行到「工具链」页换版本或位置。
+下面的「效果预览」有四张卡片，每张对应一项设置，示例代码随设置变化：
+
+| 卡片 | 开启时 | 关闭时 |
+| --- | --- | --- |
+| 展开过程宏 | `#[derive(Serialize)]` 下面画出 derive 生成的 `impl Serialize` | 生成的代码位置显示“未展开” |
+| 运行构建脚本 | `include!(concat!(env!("OUT_DIR"), …))` 正常解析 | 标出 rust-analyzer 报告的 `` `OUT_DIR` not set `` 错误；开启「展开过程宏」时会注明构建脚本仍会运行 |
+| 高亮文档注释中的代码 | 文档注释里的 Rust 代码和 `` [`i32`] `` 链接按源码着色 | 文档注释整段是注释颜色 |
+| 保存时检查 | `cargo check` 报告未使用变量；改成 `cargo clippy` 时另外报告 `len_zero` lint | 只显示 rust-analyzer 自己的诊断 |
+
+| 中文、深色 | 英文、浅色 |
+| --- | --- |
+| <img src="docs/assets/settings-previews/language-zh-Hans-dark.png" alt="Rust 语言设置页的工具链和效果预览，中文、深色外观" width="420"> | <img src="docs/assets/settings-previews/language-en-light.png" alt="Rust language settings page with the toolchain rows and the preview, English, light appearance" width="420"> |
+
+改了还没应用的选项会先在预览里显示：改动的卡片加上强调色边框和圆点，预览右上角标出“含未应用的修改”，
+保存之后才写进设置。下面两张图关掉了三个开关、把检查命令改成 `cargo clippy`，还没有应用：
+
+| 中文、浅色 | 英文、深色 |
+| --- | --- |
+| <img src="docs/assets/settings-previews/language-zh-Hans-draft-light.png" alt="改了还没应用的选项先显示在预览里，标出含未应用的修改" width="420"> | <img src="docs/assets/settings-previews/language-en-draft-dark.png" alt="Options changed but not applied show in the preview first, marked as not applied yet" width="420"> |
+
+**Cargo 构建工具页**：先列出构建用的 cargo，再画出 Lithe 查找 cargo 的三步（项目环境、全局默认、自动发现），
+cargo 是 rustup 的代理时 rustup 怎样选 Rust 版本（按目录覆盖、`rust-toolchain.toml`、默认工具链），以及这个 cargo 用于读取项目、
+构建、检查、运行和调试。插件在这一页没有设置项；要换 cargo，点击 cargo 那一行到「工具链」页选择。
+
+| 中文、浅色 | 英文、深色 |
+| --- | --- |
+| <img src="docs/assets/settings-previews/cargo-zh-Hans-light.png" alt="Cargo 构建工具页画出 Lithe 查找 cargo 的顺序" width="420"> | <img src="docs/assets/settings-previews/cargo-en-dark.png" alt="The Cargo build tool page shows the order in which Lithe looks for cargo" width="420"> |
+
+截图用宿主的无头界面画出，路径和版本是测试数据。
 
 ## rust-analyzer
 
@@ -149,8 +199,11 @@ Windows 是对应架构的 `bin/backend.exe`。
 ## 工作方式
 
 - 插件后端是一个用 [Rust 插件 SDK](https://github.com/Lithe-IDEA/Lithe-core-rust/tree/main/shared/plugins/sdk/rust)
-  写的程序，Lithe 按两种身份分别启动它：插件后端回答 `rustAnalyzer.launch`；Cargo 构建提供者回答
+  写的程序，Lithe 按两种身份分别启动它：插件后端回答 `rustAnalyzer.launch` 和 `settings.view`；Cargo 构建提供者回答
   `lithe/build/model`、`dependencies`、`execute`、`prepareRun`、`prepareDebug` 和 `runEntrypoints`。
+- 设置预览由 `settingRegions` 声明：`language` 区域放在 Rust 语言页，`cargo` 区域放在 Cargo 构建工具页，两个都由
+  `settings.view` 画出。设置窗口打开区域、改动设置或改变宽度时，Lithe 把界面语言、宽度、已保存的设置和没应用的草稿发给后端，
+  后端回答工具行和一个画布（`canvas`），Core 校验后由 Lithe 绘制。后端只读这些值，不改设置，也不调用 cargo 或 rustup。
 - 后端不保存状态，也不写文件：每次请求都重新问 Cargo 或 rustup。Cargo 只写项目的 target 目录，rustup 只写它自己的工具链。
 - 运行由后端给出 `cargo run` 的命令行，Lithe 运行它；调试由后端先构建，再把程序路径交给 Lithe，Lithe 按
   `debugAdapters` 的声明启动 CodeLLDB（`stdio` 传输）。
@@ -201,7 +254,7 @@ node --test scripts/package/*.test.mjs         # 核对 dist/ 里的每个包
 ## 宿主端到端测试
 
 `e2e/host/` 里的测试通过 Lithe 桌面端自己的测试工具（宿主的 `desktop/internal/workbench` 和 `desktop/internal/projectgen` 包）
-安装真实插件包，像用户一样操作构建窗口、编辑器和调试窗口。主仓库不读取本仓库，`e2e/host/lithe-host.json`
+安装真实插件包，像用户一样操作构建窗口、编辑器、调试窗口和设置页的预览区域。主仓库不读取本仓库，`e2e/host/lithe-host.json`
 记录测试最后一次通过时的宿主版本。
 
 需要 Node.js 22+、Go、Rust 工具链（构建宿主固定的 Rust Core）、`git`，以及测试要用的 `cargo`、`rustup` 和
@@ -210,7 +263,7 @@ rust-analyzer 组件（`rustup component add rust-analyzer`；测试不会替你
 ```bash
 node scripts/build-backend.mjs darwin
 node scripts/package.mjs --platforms darwin
-LITHE_TEST_RUST_PLUGIN_ARCHIVE="$PWD/dist/rust-support-0.1.0-darwin.zip" node scripts/e2e-host.mjs
+LITHE_TEST_RUST_PLUGIN_ARCHIVE="$PWD/dist/rust-support-0.1.1-darwin.zip" node scripts/e2e-host.mjs
 ```
 
 插件包路径要写绝对路径。脚本把固定版本的宿主（只取 `desktop/` 和 `scripts/`）检出到 `.artifacts/lithe-host`，
@@ -237,7 +290,8 @@ Lithe 主仓库的功能矩阵不收录插件能力，改动插件行为时在�
 
 3. `Release` 工作流会核对标签与版本一致、打包并发布 Release（说明里附 SHA-256 和
    `docs/releases/v<版本>.md`）。`release.yml` 里 `PRERELEASE_TAGS` 列出的版本会标为预发布版本：
-   目前是依赖还没发布的下载型命令安装器（1lck/Lithe-IDEA#2241）和 rustup 链接修复（1lck/Lithe-IDEA#2242）的 `v0.1.0`。
+   目前是发布时依赖还没发布的下载型命令安装器（1lck/Lithe-IDEA#2241）和 rustup 链接修复（1lck/Lithe-IDEA#2242）的 `v0.1.0`。
+   `v0.1.1` 依赖的宿主能力都已在桌面端 0.8.12 里发布，是正式版本。
 4. Lithe Store 的自动追踪会发现稳定版本并开合并请求，合并后用户即可在 Lithe 中更新。自动追踪会跳过预发布版本；
    需要收录时在 Store 中手工提交条目，并使用已发布 ZIP 的实际 SHA-256。
 
