@@ -13,9 +13,42 @@
         "clippy": "cargo clippy"
       }
     },
+    "procMacro": {
+      "title": "展开过程宏",
+      "description": "编译并运行过程宏（如 derive(Serialize)、#[tokio::main]），它们生成的代码才能用于补全、跳转和类型推断。开启时也会运行构建脚本。"
+    },
+    "buildScripts": {
+      "title": "运行构建脚本",
+      "description": "运行各软件包的 build.rs，分析它生成到 OUT_DIR 的代码和它设置的 cfg。开启“展开过程宏”时，构建脚本仍会运行。"
+    },
+    "docCommentInject": {
+      "title": "高亮文档注释中的代码",
+      "description": "像源代码一样高亮文档注释示例中的 Rust 代码和指向条目的链接。"
+    },
     "installRustAnalyzer": {
       "title": "用 rustup 安装 rust-analyzer",
       "description": "项目的 rustup 工具链缺少 rust-analyzer 时，先用 rustup component add 安装 rust-analyzer 和 rust-src，再启动它。"
+    }
+  },
+  "settingRegions": {
+    "language": {
+      "keywords": [
+        "工具链",
+        "过程宏",
+        "宏展开",
+        "构建脚本",
+        "文档注释",
+        "代码高亮",
+        "保存时检查",
+        "效果预览"
+      ]
+    },
+    "cargo": {
+      "keywords": [
+        "Cargo 程序",
+        "工具链",
+        "查找顺序"
+      ]
     }
   },
   "buildOptions": {

@@ -1,12 +1,12 @@
 [package]
 name = "rust-support-backend"
 # Kept equal to the plugin's version; scripts/package.mjs refuses a mismatch.
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "Apache-2.0"
 rust-version = "1.87"
 publish = false
-description = "The Cargo build provider of the Rust Support plugin for Lithe."
+description = "The backend of the Rust Support plugin for Lithe: the Cargo build provider and the settings previews."
 
 [[bin]]
 name = "backend"

@@ -3,7 +3,10 @@
 //!
 //! - The plugin backend answers the `rustAnalyzer.launch` function: the
 //!   rust-analyzer command line, following the project's rustup toolchain
-//!   and adding the rust-analyzer component when it is missing.
+//!   and adding the rust-analyzer component when it is missing. It also
+//!   draws the views of the settings regions (`settings.view`): the Rust
+//!   page's toolchain rows and a preview of the rust-analyzer options, and
+//!   the order in which the Cargo page's cargo is looked for.
 //! - The Cargo build provider answers the host's `lithe/build/*` requests
 //!   for the `cargo` build system of `plugin.json`:
 //!
@@ -32,6 +35,7 @@ mod options;
 mod paths;
 mod process;
 mod request;
+mod view;
 
 use lithe_plugin_sdk::Backend;
 use paths::Workspace;
@@ -60,6 +64,7 @@ fn main() {
             analyzer::answer(&params, context)
         })
         .expect("the function ID is valid");
+    view::register(&mut backend).expect("the view ID is valid");
 
     let handlers = Arc::clone(&workspace);
     let current = move || paths::current(&handlers);

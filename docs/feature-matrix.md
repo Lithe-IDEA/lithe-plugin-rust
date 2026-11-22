@@ -22,6 +22,7 @@
 | --- | --- | --- | --- | --- |
 | `rust-support-plugin` | rust-analyzer 代码智能，Cargo 构建、运行和依赖，cargo / rustup / rust-analyzer 工具定义 | implemented / pending | implemented / pending | 2026-11-21 macOS workbench 集成测试通过；Windows 后端只在 CI 构建，没有在 Windows 版 Lithe 里运行过 |
 | `rust-debug-codelldb` | 用按需下载的 CodeLLDB 调试二进制和示例 | implemented / pending | partial / pending | 2026-11-21 macOS workbench 集成测试通过；Windows 没有运行过；Windows ARM64 没有 CodeLLDB 包 |
+| `rust-settings-previews` | Rust 语言设置页和 Cargo 构建工具页里插件自己画的预览 | implemented / pending | implemented / pending | 2026-11-22 macOS 宿主端到端测试通过（本地 0.1.1 包，宿主 `a6afaaf`）；Windows 后端只在 CI 构建，没有在 Windows 版 Lithe 里运行过 |
 | `rust-project-generator` | 「新建项目」里的 Rust（Cargo 软件包），Cargo 选择 | implemented / pending | implemented / pending | 2026-11-21 macOS 宿主集成测试通过；Windows 没有运行过 |
 
 ## rust-support-plugin
@@ -31,7 +32,8 @@
 `cargo metadata --no-deps` 组成软件包和目标；在构建窗口里运行 Build、Check、Clippy、Doc、Clean，运行二进制和示例，
 `cargo metadata` 的依赖图按 `cargo tree` 的样子列出；`Cargo.toml`、`Cargo.lock`、`.cargo/config(.toml)`、
 `rust-toolchain(.toml)` 变化后重新读取；构建选项 Release Profile、Features、All Features、No Default Features、Offline；
-插件设置 Check on save、Check command、Install rust-analyzer with rustup。`toolDefinitions` 声明 `cargo`、`rustup`、
+插件设置 Check on save、Check command、Expand procedural macros、Run build scripts、Highlight code in doc comments、
+Install rust-analyzer with rustup，前两项和高亮文档注释立即生效，其余在语言服务器下次启动时生效。`toolDefinitions` 声明 `cargo`、`rustup`、
 `rust-analyzer`，在 `~/.cargo`（`CARGO_HOME`）和 Homebrew 里查找，列在「构建、执行、部署 › 工具链」里，项目可以固定一个 Cargo。
 
 | 平台 | 实现 | 验证 | 说明 |
@@ -165,6 +167,70 @@ Edition 2024（默认）或 2021。由模板写出 `Cargo.toml` 和忽略 `/targ
 4. 项目名含空格时 Package name 显示错误、不能创建；改成合法名字后可以创建。
 5. 选 Edition 2021 创建，`Cargo.toml` 里是 `edition = "2021"`。
 6. 「工具链」里这个项目固定的是创建时选的 Cargo。
+
+## rust-settings-previews
+
+**能力**：0.1.1 起插件后端（`bin/backend`）实现 `settings.view` 视图函数，给两个 `settingRegions` 画画布：
+
+- `language`（「语言 › Rust」）：先是宿主画的「工具链」一节，列出 cargo、rust-analyzer、rustup 的版本和路径，点一行到「工具链」页改；
+  下面四张卡片画 rust-analyzer 选项在编辑器里的样子：展开过程宏（`procMacro`，开启时显示 derive 生成的代码）、
+  运行构建脚本（`buildScripts`，关闭时 `OUT_DIR` 里的代码无法解析；关闭但过程宏开启时标出“仍会运行”）、
+  高亮文档注释中的代码（`docCommentInject`）、保存时检查（`checkOnSave`、`checkCommand`：不检查、cargo check 的编译器警告、
+  cargo clippy 另外的 lint）。
+- `cargo`（「构建、执行、部署 › 构建工具 › Cargo」）：宿主画的 cargo 一行，下面是 Lithe 查找 cargo 的顺序（项目环境、全局默认、
+  自动发现，按 `toolDefinitions` 的 `cargo` 排列），rustup 选 Rust 版本的顺序（目录覆盖、`rust-toolchain.toml`、默认工具链），
+  以及 cargo 用于哪些流程。查找顺序不随插件设置变化，实际找到的 cargo 看上面那一行。
+
+语言页读设置窗口里还没应用的草稿，草稿和已保存的值不同时对应卡片先变，边框换成强调色、值标签前加一个圆点，标题行右侧的说明换成“含未应用的修改”。
+画面中英文跟随设置窗口的语言，浅色和深色外观用宿主的颜色标记或成对颜色。后端只读设置，不启动 cargo、rustup 或 rust-analyzer，也不写插件目录。
+
+场景按视图事件里的 `width` 排版：语言页放得下两张最窄的卡片（宽度至少 594）时两张一行，否则一张一行，卡片随宽度变宽，
+文字和代码保持原来的字号；Cargo 页的步骤卡片随宽度变宽。画布声明 `on: ["resize"]`，窗口宽度稳定后宿主发 `resize`，
+后端按新宽度重画。事件里没有 `width` 时按最窄设置窗口的区域宽度画（语言页 610、Cargo 页 340），也不声明 `resize`。
+
+| 平台 | 实现 | 验证 | 说明 |
+| --- | --- | --- | --- |
+| macOS | implemented | pending | 后端是 Apple Silicon 和 Intel 的通用二进制 |
+| Windows | implemented | pending | 后端在 CI 里为 x64 和 ARM64 构建；还没有在 Windows 版 Lithe 里打开过设置预览 |
+
+**证据**：
+
+- `io.github.lithe-idea.rust-support/plugin.json`：`settingRegions` 的 `language`（`languageID: rust`）、`cargo`（`buildSystemID: cargo`），
+  `requires` 的 `backend: 0`、`ui: 0`，权限 `backend.launch`、`ui.contribute`；设置 `procMacro`、`buildScripts`、`docCommentInject`。
+- `backend/src/view/`：视图函数和场景；`cargo test --locked` 检查每个场景在两种语言、各个宽度下都在契约限制内、viewBox 宽度等于事件宽度、
+  卡片内容不超出卡片，两张一行只在放得下两张最窄卡片时出现，没有宽度时退回最窄窗口的排版且不声明 `resize`，
+  草稿让预览先变并标出未应用的修改，以及各设置对预览的影响。
+- `e2e/host/desktop/internal/workbench/rust_support_plugin_settings_view_e2e_test.go`：`TestRustSupportPluginDrawsItsSettingsRegions`
+  经设置窗口自己的设置来源启动安装包里的后端，用中英文打开两个区域，由 Core 校验每次回答；检查画布前列出的工具、
+  viewBox 宽度等于区域宽度、画布高度放得下 viewBox、不写 `pan` 并声明 `resize`；语言页发 `checkCommand: clippy` 草稿，
+  cargo check 的说明换成 clippy 的 lint 并标出未应用的修改；再以 760 的宽度发 `resize`，检查按新宽度重画且草稿标记仍在；安装目录的文件不变。
+
+**依赖的宿主能力**：插件视图和设置区域（1lck/Lithe-IDEA#2183，Core Lithe-core-rust#104，桌面端 0.8.7 起），
+视图事件带 `width` 和 `resize`（1lck/Lithe-IDEA#2191，Core Lithe-core-rust#109，桌面端 0.8.10 起）。插件其他功能本来就需要桌面端 0.8.12，
+所以 0.1.1 要求 0.8.12 及以上，这两项都已包含。
+
+**限制**：
+
+- 代码按 SF Mono 的 7pt 字宽一个字符一个节点排版，标记才能对准字符；Windows 上 Consolas 的字更窄，代码间距会比宿主自己画的略宽。
+  文字宽度按字号估算，不是宿主量出来的；卡片窄时较长的说明由宿主按最大宽度截断。
+- 预览画的是固定的示例代码，不是当前项目里的代码；Cargo 页不显示实际找到的 cargo，那是上面工具行的事。
+- 环境变量、rustfmt 额外参数和设置子页暂时没做；标准库路径不显示为“自动（实际路径）”。
+
+**最近验证**：2026-11-22，macOS（Apple Silicon），本地构建的 `rust-support-0.1.1-darwin.zip`，宿主 main `a6afaaf`。
+`TestRustSupportPluginDrawsItsSettingsRegions` 通过：后端由宿主启动，两个区域在中英文下按区域宽度（610、340）各画出工具行和一张画布，
+声明 `resize`、不写 `pan`；clippy 草稿让保存时检查卡片换成 clippy 的说明并标出未应用的修改；以 760 发 `resize` 后按新宽度重画，
+草稿标记仍在；安装目录的文件不变。同一次运行里另外两个 workbench 测试（构建和语言服务、CodeLLDB 调试）和四个 projectgen 测试也通过。另把后端画出的场景放进插件 e2e 覆盖层里的宿主无头界面截图（浅色和深色，中英文，默认值、草稿和 Cargo 页），
+README 的“设置预览”放了其中的中文截图。没有做手工验收。
+
+**验证方法**（macOS）：
+
+1. 用桌面端 0.8.12 或更新版本安装插件包，打开「设置 › 语言 › Rust」：顶部是工具链一节，下面四张预览卡片，浅色和深色外观下文字和代码都清楚。
+   拖宽、拖窄设置窗口，停下后预览按新宽度重新排版：放得下时两张一行，窄了一张一行，字号不变，不放大也不被裁掉。
+2. 关掉展开过程宏、运行构建脚本、高亮文档注释中的代码，把 Check command 改成 clippy，先不点应用：对应卡片立刻变化，
+   标出“含未应用的修改”；点应用后标记消失。只关运行构建脚本时，卡片说明构建脚本仍会因过程宏运行。
+3. 打开「设置 › 构建、执行、部署 › 构建工具 › Cargo」：上面是 cargo 一行，下面是查找 cargo 的三步和 rustup 的版本选择；
+   拖宽窗口后步骤卡片跟着变宽。
+4. 界面语言换成中文，两个预览都显示中文。
 
 ## Windows 安装包
 
